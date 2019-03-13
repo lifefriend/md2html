@@ -19,29 +19,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 var fs = require('fs');
-var path = require('path');
-var Remarkable = require('remarkable');
-var md = new Remarkable('full');
+var render = require('./render.js');
 
-function render(dir) {
+// 转换 markdown 文件夹下的所有 .md文件
+// render('./markdown/','./html/');
+
+// 转换 markdown 子文件夹下的所有 .md文件
+readDir('./markdown/','./markdown/')
+
+function readDir(dir,writeDir){
     var files = fs.readdirSync(dir);
-    for (file in files) {
+    for (let file in files) {
         var file_name = files[file];
-
-        if (file_name.substr(file_name.length - 3) === ".md") {
-            console.log("File: " + file_name + " found!");            
-            var txt = fs.readFileSync(__dirname + "/markdown/" + file_name);
-
-            fs.writeFileSync(
-                './html/' + file_name.substr(0,file_name.length - 3) + ".html",
-                md.render(txt.toString()));
-            console.log("File: " + 
-                    file_name.substr(0,file_name.length - 3) + 
-                    ".html" + " Write Success!")
+        var file_path = dir + file_name
+        var stat = fs.statSync(file_path);
+        if(stat.isDirectory()){
+            var write_path = writeDir + file_name
+            if(!fs.existsSync(write_path)){
+                fs.mkdirSync(write_path)
+            }
+            render(file_path,write_path);
         }
     }
 }
-
-render('./markdown/');
